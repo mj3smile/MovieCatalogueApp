@@ -1,0 +1,71 @@
+package net.papanketik.moviescatalogue.favorite.movie
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
+import androidx.paging.LoadState
+import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
+import net.papanketik.moviescatalogue.core.domain.model.MovieAndTvShow
+import net.papanketik.moviescatalogue.core.ui.ListDataAdapter
+import net.papanketik.moviescatalogue.detail.DetailActivity
+import net.papanketik.moviescatalogue.favorite.databinding.FragmentFavoriteMovieBinding
+import org.koin.androidx.viewmodel.ext.android.viewModel
+
+class FavoriteMovieFragment : Fragment() {
+    private lateinit var binding: FragmentFavoriteMovieBinding
+    private val listDataAdapter = ListDataAdapter()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentFavoriteMovieBinding.inflate(layoutInflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val viewModel: FavoriteMovieViewModel by viewModel()
+
+        binding.favoriteMovieProgressBar.visibility = View.VISIBLE
+        viewModel.favoriteMovies.observe(viewLifecycleOwner, {
+            binding.favoriteMovieProgressBar.visibility = View.GONE
+            viewLifecycleOwner.lifecycleScope.launch {
+                listDataAdapter.submitData(it)
+            }
+
+            listDataAdapter.addLoadStateListener { loadState ->
+                if (loadState.source.refresh is LoadState.NotLoading && loadState.append.endOfPaginationReached && listDataAdapter.itemCount < 1) {
+                    binding.noDataMessage.visibility = View.VISIBLE
+                } else {
+                    binding.noDataMessage.visibility = View.GONE
+                }
+            }
+        })
+
+        showRecyclerList()
+    }
+
+    private fun showRecyclerList() {
+        with(binding.rvFavoriteMovie) {
+            layoutManager = LinearLayoutManager(context)
+            setHasFixedSize(true)
+            adapter = listDataAdapter
+        }
+
+        listDataAdapter.setOnItemClickCallback(object: ListDataAdapter.OnItemClickCallback {
+            override fun onItemClicked(data: MovieAndTvShow) {
+                val intent = Intent(activity, Class.forName("net.papanketik.moviescatalogue.detail.DetailActivity"))
+                intent.putExtra(DetailActivity.EXTRA_ID, data.id)
+                intent.putExtra(DetailActivity.EXTRA_TYPE, DetailActivity.MOVIE_TYPE_CODE)
+                startActivity(intent)
+            }
+        })
+    }
+}

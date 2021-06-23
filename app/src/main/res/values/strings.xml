@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Movie Catalogue</string>
+    <string name="movie_tab_text">Movie</string>
+    <string name="tvshow_tab_text">TV Show</string>
+    <string name="overview_text">Overview</string>
+    <string name="load_data_fail_message">Failed to load data</string>
+    <string name="menu_bookmark_title">Bookmark</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rating_text">Rating</string>
+    <string name="poster_desc">Poster</string>
+    <string name="rating_col">:</string>
+</resources>
